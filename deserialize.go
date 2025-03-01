@@ -5,15 +5,10 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/mlange-42/ark/ecs"
 )
-
-type component struct {
-	ID     ecs.ID
-	Comp   interface{}
-	Target ecs.Entity
-}
 
 // Deserialize an Ark [ecs.World] from JSON.
 //
@@ -97,16 +92,19 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			return err
 		}
 
-		target := ecs.Entity{}
-		var targetComp ecs.ID
-		hasRelation := false
+		// TODO: check that multiple relations work properly
+		idsMap := map[string]ecs.ID{}
+		targetsMap := map[string]ecs.Entity{}
+
 		components := make([]component, 0, len(mp))
 		compIDs := make([]ecs.ID, 0, len(mp))
 		for tpName, value := range mp {
-			if tpName == targetTag {
+			if strings.HasSuffix(tpName, targetTag) {
+				var target ecs.Entity
 				if err := json.Unmarshal(value.Bytes, &target); err != nil {
 					return err
 				}
+				targetsMap[strings.TrimSuffix(tpName, targetTag)] = target
 				continue
 			}
 
@@ -118,8 +116,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			info := infos[id]
 
 			if info.IsRelation {
-				targetComp = id
-				hasRelation = true
+				idsMap[tpName] = id
 			}
 
 			comp := reflect.New(info.Type).Interface()
@@ -137,16 +134,13 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			continue
 		}
 
-		if !hasRelation {
-			target = ecs.Entity{}
+		relations := []ecs.RelationID{}
+		for name, id := range idsMap {
+			relations = append(relations, ecs.RelID(id, targetsMap[name]))
 		}
-
-		u.Add(entity, compIDs...)
+		u.AddRel(entity, compIDs, relations...)
 		for _, comp := range components {
 			assign(world, entity, comp.ID, comp.Comp)
-		}
-		if !target.IsZero() {
-			u.SetRelations(entity, ecs.RelID(targetComp, target))
 		}
 	}
 	return nil

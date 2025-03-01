@@ -278,11 +278,11 @@ func TestSerializeRelation(t *testing.T) {
 	parent := u.NewEntity(posId)
 	*(*Position)(u.Get(parent, posId)) = Position{X: 1, Y: 2}
 
-	child1 := u.NewEntity(posId, relId)
+	child1 := u.NewEntityRel([]ecs.ID{posId, relId}, ecs.RelID(relId, ecs.Entity{}))
 	*(*Position)(u.Get(child1, posId)) = Position{X: 3, Y: 4}
 	*(*ChildRelation)(u.Get(child1, relId)) = ChildRelation{}
 
-	child2 := u.NewEntity(posId, relId)
+	child2 := u.NewEntityRel([]ecs.ID{posId, relId}, ecs.RelID(relId, ecs.Entity{}))
 	*(*Position)(u.Get(child2, posId)) = Position{X: 5, Y: 6}
 	*(*ChildRelation)(u.Get(child2, relId)) = ChildRelation{}
 
@@ -339,19 +339,17 @@ func TestSerializeGeneric(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	mapper := ecs.NewMap2[Generic[int32], Generic[float32]](&w)
+	intMap := ecs.NewMap[Generic[int32]](&w)
+	floatMap := ecs.NewMap[Generic[float32]](&w)
 
-	c1, c2 := mapper.Get(e1)
-	assert.Equal(t, c1, &Generic[int32]{Value: 1})
-	assert.Equal(t, c2, (*Generic[float32])(nil))
+	assert.Equal(t, Generic[int32]{Value: 1}, *intMap.Get(e1))
+	assert.False(t, floatMap.Has(e1))
 
-	c1, c2 = mapper.Get(e2)
-	assert.Equal(t, c1, (*Generic[int32])(nil))
-	assert.Equal(t, c2, &Generic[float32]{Value: 2.0})
+	assert.False(t, intMap.Has(e2))
+	assert.Equal(t, Generic[float32]{Value: 2.0}, *floatMap.Get(e2))
 
-	c1, c2 = mapper.Get(e3)
-	assert.Equal(t, c1, &Generic[int32]{Value: 3})
-	assert.Equal(t, c2, &Generic[float32]{Value: 4.0})
+	assert.Equal(t, Generic[int32]{Value: 3}, *intMap.Get(e3))
+	assert.Equal(t, Generic[float32]{Value: 4.0}, *floatMap.Get(e3))
 
 	_, _, _ = e1, e2, e3
 }

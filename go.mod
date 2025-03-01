@@ -3,11 +3,9 @@ module github.com/mlange-42/ark-serde
 go 1.24.0
 
 require (
-	github.com/mlange-42/ark v0.1.0
+	github.com/mlange-42/ark v0.1.1-0.20250301131458-ac4b52a0dd98
 	github.com/stretchr/testify v1.10.0
 )
-
-replace github.com/mlange-42/ark v0.1.0 => ../ark
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
