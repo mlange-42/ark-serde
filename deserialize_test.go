@@ -173,69 +173,79 @@ func TestDeserializeSkipResources(t *testing.T) {
 	assert.Equal(t, *res, Velocity{X: 1000})
 }
 
-// TODO: re-activate
-/*
 func TestDeserializeErrors(t *testing.T) {
+	world := createWorld(false)
+
+	err := arkserde.Deserialize([]byte("{xxx}"), world)
+	assert.Contains(t, err.Error(), "invalid character 'x'")
+
+	err = arkserde.Deserialize([]byte(textOk), world)
+	assert.Contains(t, err.Error(), "component type is not registered")
+
+	world = createWorld(true)
+
+	err = arkserde.Deserialize([]byte(textOk), world)
+	assert.Contains(t, err.Error(), "resource type is not registered")
+
+	world = createWorld(true)
+	_ = ecs.ResourceID[Velocity](world)
+
+	err = arkserde.Deserialize([]byte(textOk), world)
+	assert.Contains(t, err.Error(), "resource type registered but nil")
+
+	world = createWorld(true)
+	velAccess := ecs.NewResource[Velocity](world)
+	velAccess.Add(&Velocity{})
+	err = arkserde.Deserialize([]byte(textOk), world)
+	assert.Nil(t, err)
+
+	world = createWorld(true)
+	velAccess = ecs.NewResource[Velocity](world)
+	velAccess.Add(&Velocity{})
+	err = arkserde.Deserialize([]byte(textErrEntities), world)
+	assert.Contains(t, err.Error(), "world has 2 alive entities")
+
+	world = createWorld(true)
+	velAccess = ecs.NewResource[Velocity](world)
+	velAccess.Add(&Velocity{})
+	err = arkserde.Deserialize([]byte(textErrTypes), world)
+	assert.Contains(t, err.Error(), "cannot unmarshal object")
+
+	world = createWorld(true)
+	velAccess = ecs.NewResource[Velocity](world)
+	velAccess.Add(&Velocity{})
+	err = arkserde.Deserialize([]byte(textErrComponent), world)
+	assert.Contains(t, err.Error(), "cannot unmarshal array")
+
+	world = createWorld(true)
+	velAccess = ecs.NewResource[Velocity](world)
+	velAccess.Add(&Velocity{})
+	err = arkserde.Deserialize([]byte(textErrComponent2), world)
+	fmt.Println(err)
+	assert.Contains(t, err.Error(), "cannot unmarshal array")
+
+	world = createWorld(true)
+	velAccess = ecs.NewResource[Velocity](world)
+	velAccess.Add(&Velocity{})
+	err = arkserde.Deserialize([]byte(textErrResource), world)
+	fmt.Println(err)
+	assert.Contains(t, err.Error(), "cannot unmarshal array")
+
+	world = createWorld(true)
+	err = arkserde.Deserialize([]byte(textErrRelation), world)
+	assert.Contains(t, err.Error(), "cannot unmarshal object into Go value of type [2]uint32")
+}
+
+func createWorld(vel bool) *ecs.World {
 	world := ecs.NewWorld(1024)
 	_ = ecs.ComponentID[Position](&world)
 	_ = ecs.ComponentID[ChildOf](&world)
 	_ = ecs.ComponentID[ChildRelation](&world)
-
-	err := arkserde.Deserialize([]byte("{xxx}"), &world)
-	assert.Contains(t, err.Error(), "invalid character 'x'")
-
-	err = arkserde.Deserialize([]byte(textOk), &world)
-	assert.Contains(t, err.Error(), "component type is not registered")
-
-	world.Reset()
-	_ = ecs.ComponentID[Velocity](&world)
-
-	err = arkserde.Deserialize([]byte(textOk), &world)
-	assert.Contains(t, err.Error(), "resource type is not registered")
-
-	world.Reset()
-	_ = ecs.ResourceID[Velocity](&world)
-
-	err = arkserde.Deserialize([]byte(textOk), &world)
-	assert.Contains(t, err.Error(), "resource type registered but nil")
-
-	world.Reset()
-	_ = ecs.AddResource(&world, &Velocity{})
-	err = arkserde.Deserialize([]byte(textOk), &world)
-	assert.Nil(t, err)
-
-	world.Reset()
-	_ = ecs.AddResource(&world, &Velocity{})
-	err = arkserde.Deserialize([]byte(textErrEntities), &world)
-	assert.Contains(t, err.Error(), "world has 2 alive entities")
-
-	world.Reset()
-	_ = ecs.AddResource(&world, &Velocity{})
-	err = arkserde.Deserialize([]byte(textErrTypes), &world)
-	assert.Contains(t, err.Error(), "cannot unmarshal object")
-
-	world.Reset()
-	_ = ecs.AddResource(&world, &Velocity{})
-	err = arkserde.Deserialize([]byte(textErrComponent), &world)
-	assert.Contains(t, err.Error(), "cannot unmarshal array")
-
-	world.Reset()
-	_ = ecs.AddResource(&world, &Velocity{})
-	err = arkserde.Deserialize([]byte(textErrComponent2), &world)
-	fmt.Println(err)
-	assert.Contains(t, err.Error(), "cannot unmarshal array")
-
-	world.Reset()
-	_ = ecs.AddResource(&world, &Velocity{})
-	err = arkserde.Deserialize([]byte(textErrResource), &world)
-	fmt.Println(err)
-	assert.Contains(t, err.Error(), "cannot unmarshal array")
-
-	world.Reset()
-	err = arkserde.Deserialize([]byte(textErrRelation), &world)
-	assert.Contains(t, err.Error(), "cannot unmarshal object into Go value of type [2]uint32")
+	if vel {
+		_ = ecs.ComponentID[Velocity](&world)
+	}
+	return &world
 }
-*/
 
 const textOk = `{
 	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
