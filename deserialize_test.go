@@ -345,7 +345,7 @@ const textErrRelation = `{
 	  },
 	  {
 		"arkserde_test.Position" : {"X":5,"Y":6},
-		"ark.relation.Target" : {},
+		"arkserde_test.ChildRelation.ark.relation.Target" : {},
 		"arkserde_test.ChildRelation" : {"Dummy":0}
 	  }
 	],

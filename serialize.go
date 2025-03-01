@@ -10,8 +10,6 @@ import (
 	"github.com/mlange-42/ark/ecs"
 )
 
-const targetTag = "ark.relation.Target"
-
 // Serialize an Ark [ecs.World] to JSON.
 //
 // Serializes the following:
@@ -143,7 +141,7 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 					if err != nil {
 						return err
 					}
-					builder.WriteString(fmt.Sprintf("    \"%s\" : %s,\n", targetTag, eJSON))
+					builder.WriteString(fmt.Sprintf("    \"%s%s\" : %s,\n", info.Type.String(), targetTag, eJSON))
 				}
 
 				comp := query.Get(id)
