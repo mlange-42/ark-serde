@@ -37,7 +37,7 @@ func Deserialize(jsonData []byte, world *ecs.World, options ...Option) error {
 	}
 
 	if !opts.skipEntities {
-		world.LoadEntities(&deserial.World)
+		world.Unsafe().LoadEntities(&deserial.World)
 	}
 
 	if err := deserializeComponents(world, &deserial, &opts); err != nil {

@@ -56,7 +56,7 @@ func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 		return nil
 	}
 
-	entities := world.DumpEntities()
+	entities := world.Unsafe().DumpEntities()
 
 	jsonData, err := json.Marshal(entities)
 	if err != nil {
