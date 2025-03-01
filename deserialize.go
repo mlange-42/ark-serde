@@ -92,6 +92,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			return err
 		}
 
+		// TODO: check that multiple relations work properly
 		targets := []ecs.Entity{}
 		targetComps := []ecs.ID{}
 		components := make([]component, 0, len(mp))
