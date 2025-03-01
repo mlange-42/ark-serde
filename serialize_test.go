@@ -74,10 +74,8 @@ func TestSerialize(t *testing.T) {
 	velId := ecs.ComponentID[Velocity](&w)
 	childId := ecs.ComponentID[ChildOf](&w)
 
-	posAccess := ecs.NewResource[Position](&w)
-	velAccess := ecs.NewResource[Velocity](&w)
-	posAccess.Add(&Position{})
-	velAccess.Add(&Velocity{})
+	ecs.AddResource(&w, &Position{})
+	ecs.AddResource(&w, &Velocity{})
 
 	err = arkserde.Deserialize(jsonData, &w)
 	if err != nil {
@@ -104,8 +102,7 @@ func TestSerialize(t *testing.T) {
 	assert.Equal(t, *(*Velocity)(query.Get(velId)), Velocity{X: 5, Y: 6})
 	assert.Equal(t, *(*ChildOf)(query.Get(childId)), ChildOf{Entity: parent})
 
-	res := velAccess.Get()
-
+	res := ecs.GetResource[Velocity](&w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 
 	assert.True(t, w.Alive(parent))
@@ -123,10 +120,8 @@ func TestSerializeSkipEntities(t *testing.T) {
 
 	w := ecs.NewWorld(1024)
 
-	posAccess := ecs.NewResource[Position](&w)
-	velAccess := ecs.NewResource[Velocity](&w)
-	posAccess.Add(&Position{})
-	velAccess.Add(&Velocity{})
+	ecs.AddResource(&w, &Position{})
+	ecs.AddResource(&w, &Velocity{})
 
 	err = arkserde.Deserialize(jsonData, &w)
 	if err != nil {
@@ -138,7 +133,7 @@ func TestSerializeSkipEntities(t *testing.T) {
 	assert.Equal(t, query.Count(), 0)
 	query.Close()
 
-	res := velAccess.Get()
+	res := ecs.GetResource[Velocity](&w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 }
 
@@ -152,10 +147,8 @@ func TestSerializeSkipAllComponents(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	posAccess := ecs.NewResource[Position](&w)
-	velAccess := ecs.NewResource[Velocity](&w)
-	posAccess.Add(&Position{})
-	velAccess.Add(&Velocity{})
+	ecs.AddResource(&w, &Position{})
+	ecs.AddResource(&w, &Velocity{})
 
 	err = arkserde.Deserialize(jsonData, &w)
 	if err != nil {
@@ -167,8 +160,7 @@ func TestSerializeSkipAllComponents(t *testing.T) {
 	assert.Equal(t, query.Count(), 3)
 	query.Close()
 
-	res := velAccess.Get()
-
+	res := ecs.GetResource[Velocity](&w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 
 	assert.True(t, w.Alive(parent))
@@ -188,10 +180,8 @@ func TestSerializeSkipComponents(t *testing.T) {
 	velId := ecs.ComponentID[Velocity](&w)
 	childId := ecs.ComponentID[ChildOf](&w)
 
-	posAccess := ecs.NewResource[Position](&w)
-	velAccess := ecs.NewResource[Velocity](&w)
-	posAccess.Add(&Position{})
-	velAccess.Add(&Velocity{})
+	ecs.AddResource(&w, &Position{})
+	ecs.AddResource(&w, &Velocity{})
 
 	err = arkserde.Deserialize(jsonData, &w)
 	if err != nil {
@@ -213,8 +203,7 @@ func TestSerializeSkipComponents(t *testing.T) {
 	assert.Equal(t, *(*Velocity)(query.Get(velId)), Velocity{X: 5, Y: 6})
 	assert.Equal(t, *(*ChildOf)(query.Get(childId)), ChildOf{Entity: parent})
 
-	res := velAccess.Get()
-
+	res := ecs.GetResource[Velocity](&w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 
 	assert.True(t, w.Alive(parent))
@@ -255,16 +244,14 @@ func TestSerializeSkipResources(t *testing.T) {
 	_ = ecs.ComponentID[Velocity](&w)
 	_ = ecs.ComponentID[ChildOf](&w)
 
-	velAccess := ecs.NewResource[Velocity](&w)
-	velAccess.Add(&Velocity{})
+	ecs.AddResource(&w, &Velocity{})
 
 	err = arkserde.Deserialize(jsonData, &w)
 	if err != nil {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	res := velAccess.Get()
-
+	res := ecs.GetResource[Velocity](&w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 }
 
