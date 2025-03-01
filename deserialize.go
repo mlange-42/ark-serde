@@ -93,8 +93,9 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 		}
 
 		// TODO: check that multiple relations work properly
-		targets := []ecs.Entity{}
-		targetComps := []ecs.ID{}
+		idsMap := map[string]ecs.ID{}
+		targetsMap := map[string]ecs.Entity{}
+
 		components := make([]component, 0, len(mp))
 		compIDs := make([]ecs.ID, 0, len(mp))
 		for tpName, value := range mp {
@@ -103,7 +104,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 				if err := json.Unmarshal(value.Bytes, &target); err != nil {
 					return err
 				}
-				targets = append(targets, target)
+				targetsMap[strings.TrimSuffix(tpName, targetTag)] = target
 				continue
 			}
 
@@ -115,7 +116,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			info := infos[id]
 
 			if info.IsRelation {
-				targetComps = append(targetComps, id)
+				idsMap[tpName] = id
 			}
 
 			comp := reflect.New(info.Type).Interface()
@@ -134,8 +135,8 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 		}
 
 		relations := []ecs.RelationID{}
-		for i := range targetComps {
-			relations = append(relations, ecs.RelID(targetComps[i], targets[i]))
+		for name, id := range idsMap {
+			relations = append(relations, ecs.RelID(id, targetsMap[name]))
 		}
 		u.AddRel(entity, compIDs, relations...)
 		for _, comp := range components {
