@@ -1,0 +1,5 @@
+*.out
+*.pprof
+*.csv
+*.svg
+*.png

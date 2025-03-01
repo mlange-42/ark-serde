@@ -1,0 +1,361 @@
+package arkserde_test
+
+import (
+	"fmt"
+	"testing"
+
+	arkserde "github.com/mlange-42/ark-serde"
+	"github.com/mlange-42/ark/ecs"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestDeserializeSkipEntities(t *testing.T) {
+	jsonData, _, _, err := serialize()
+
+	if err != nil {
+		assert.Fail(t, "could not serialize: %s\n", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	w := ecs.NewWorld(1024)
+	posAccess := ecs.NewResource[Position](&w)
+	velAccess := ecs.NewResource[Velocity](&w)
+	posAccess.Add(&Position{})
+	velAccess.Add(&Velocity{})
+
+	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipEntities())
+	if err != nil {
+		assert.Fail(t, "could not deserialize: %s\n", err)
+	}
+
+	query := w.Unsafe().Query(ecs.NewFilter())
+
+	assert.Equal(t, query.Count(), 0)
+	query.Close()
+
+	res := velAccess.Get()
+	assert.Equal(t, *res, Velocity{X: 1000})
+}
+
+func TestDeserializeSkipAllComponents(t *testing.T) {
+	jsonData, parent, child, err := serialize()
+
+	if err != nil {
+		assert.Fail(t, "could not serialize: %s\n", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	w := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&w)
+	_ = ecs.ComponentID[Velocity](&w)
+	_ = ecs.ComponentID[ChildOf](&w)
+	posAccess := ecs.NewResource[Position](&w)
+	velAccess := ecs.NewResource[Velocity](&w)
+	posAccess.Add(&Position{})
+	velAccess.Add(&Velocity{})
+
+	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipAllComponents())
+	if err != nil {
+		assert.Fail(t, "could not deserialize: %s\n", err)
+	}
+
+	query := w.Unsafe().Query(ecs.NewFilter())
+
+	assert.Equal(t, query.Count(), 3)
+	query.Close()
+
+	res := velAccess.Get()
+
+	assert.Equal(t, *res, Velocity{X: 1000})
+
+	assert.True(t, w.Alive(parent))
+	assert.True(t, w.Alive(child))
+}
+
+func TestDeserializeSkipComponents(t *testing.T) {
+	jsonData, parent, child, err := serialize()
+
+	if err != nil {
+		assert.Fail(t, "could not serialize: %s\n", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	w := ecs.NewWorld(1024)
+	posId := ecs.ComponentID[Position](&w)
+	velId := ecs.ComponentID[Velocity](&w)
+	childId := ecs.ComponentID[ChildOf](&w)
+
+	posAccess := ecs.NewResource[Position](&w)
+	velAccess := ecs.NewResource[Velocity](&w)
+	posAccess.Add(&Position{})
+	velAccess.Add(&Velocity{})
+
+	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipComponents(ecs.C[Position]()))
+	if err != nil {
+		assert.Fail(t, "could not deserialize: %s\n", err)
+	}
+
+	query := w.Unsafe().Query(ecs.NewFilter())
+
+	assert.Equal(t, query.Count(), 3)
+
+	query.Next()
+	assert.False(t, query.Has(posId))
+	assert.False(t, query.Has(velId))
+
+	query.Next()
+	assert.False(t, query.Has(posId))
+	assert.False(t, query.Has(velId))
+
+	query.Next()
+	assert.False(t, query.Has(posId))
+	assert.True(t, query.Has(velId))
+	assert.Equal(t, *(*Velocity)(query.Get(velId)), Velocity{X: 5, Y: 6})
+	assert.Equal(t, *(*ChildOf)(query.Get(childId)), ChildOf{Entity: parent})
+
+	res := velAccess.Get()
+
+	assert.Equal(t, *res, Velocity{X: 1000})
+
+	assert.True(t, w.Alive(parent))
+	assert.True(t, w.Alive(child))
+}
+
+func TestDeserializeSkipAllResources(t *testing.T) {
+	jsonData, _, _, err := serialize()
+
+	if err != nil {
+		assert.Fail(t, "could not serialize: %s\n", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	w := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&w)
+	_ = ecs.ComponentID[Velocity](&w)
+	_ = ecs.ComponentID[ChildOf](&w)
+
+	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipAllResources())
+	if err != nil {
+		assert.Fail(t, "could not deserialize: %s\n", err)
+	}
+}
+
+func TestDeserializeSkipResources(t *testing.T) {
+	jsonData, _, _, err := serialize()
+
+	if err != nil {
+		assert.Fail(t, "could not serialize: %s\n", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	w := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&w)
+	_ = ecs.ComponentID[Velocity](&w)
+	_ = ecs.ComponentID[ChildOf](&w)
+
+	posAccess := ecs.NewResource[Position](&w)
+	velAccess := ecs.NewResource[Velocity](&w)
+	posAccess.Add(&Position{})
+	velAccess.Add(&Velocity{})
+
+	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipResources(ecs.C[Position]()))
+	if err != nil {
+		assert.Fail(t, "could not deserialize: %s\n", err)
+	}
+
+	res := velAccess.Get()
+
+	assert.Equal(t, *res, Velocity{X: 1000})
+}
+
+// TODO: re-activate
+/*
+func TestDeserializeErrors(t *testing.T) {
+	world := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&world)
+	_ = ecs.ComponentID[ChildOf](&world)
+	_ = ecs.ComponentID[ChildRelation](&world)
+
+	err := arkserde.Deserialize([]byte("{xxx}"), &world)
+	assert.Contains(t, err.Error(), "invalid character 'x'")
+
+	err = arkserde.Deserialize([]byte(textOk), &world)
+	assert.Contains(t, err.Error(), "component type is not registered")
+
+	world.Reset()
+	_ = ecs.ComponentID[Velocity](&world)
+
+	err = arkserde.Deserialize([]byte(textOk), &world)
+	assert.Contains(t, err.Error(), "resource type is not registered")
+
+	world.Reset()
+	_ = ecs.ResourceID[Velocity](&world)
+
+	err = arkserde.Deserialize([]byte(textOk), &world)
+	assert.Contains(t, err.Error(), "resource type registered but nil")
+
+	world.Reset()
+	_ = ecs.AddResource(&world, &Velocity{})
+	err = arkserde.Deserialize([]byte(textOk), &world)
+	assert.Nil(t, err)
+
+	world.Reset()
+	_ = ecs.AddResource(&world, &Velocity{})
+	err = arkserde.Deserialize([]byte(textErrEntities), &world)
+	assert.Contains(t, err.Error(), "world has 2 alive entities")
+
+	world.Reset()
+	_ = ecs.AddResource(&world, &Velocity{})
+	err = arkserde.Deserialize([]byte(textErrTypes), &world)
+	assert.Contains(t, err.Error(), "cannot unmarshal object")
+
+	world.Reset()
+	_ = ecs.AddResource(&world, &Velocity{})
+	err = arkserde.Deserialize([]byte(textErrComponent), &world)
+	assert.Contains(t, err.Error(), "cannot unmarshal array")
+
+	world.Reset()
+	_ = ecs.AddResource(&world, &Velocity{})
+	err = arkserde.Deserialize([]byte(textErrComponent2), &world)
+	fmt.Println(err)
+	assert.Contains(t, err.Error(), "cannot unmarshal array")
+
+	world.Reset()
+	_ = ecs.AddResource(&world, &Velocity{})
+	err = arkserde.Deserialize([]byte(textErrResource), &world)
+	fmt.Println(err)
+	assert.Contains(t, err.Error(), "cannot unmarshal array")
+
+	world.Reset()
+	err = arkserde.Deserialize([]byte(textErrRelation), &world)
+	assert.Contains(t, err.Error(), "cannot unmarshal object into Go value of type [2]uint32")
+}
+*/
+
+const textOk = `{
+	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
+	"Types" : [
+	  "arkserde_test.Velocity",
+	  "arkserde_test.ChildOf",
+	  "arkserde_test.Position"
+	],
+	"Components" : [
+	  {
+		"arkserde_test.Position" : {"X":1,"Y":2}
+	  },
+	  {
+		"arkserde_test.Position" : {"X":3,"Y":4},
+		"arkserde_test.Velocity" : {"X":5,"Y":6},
+		"arkserde_test.ChildOf" : {"Entity":[1,0]}
+	  }
+	],
+	"Resources" : {
+		"arkserde_test.Velocity" : {"X":1000,"Y":0}
+	}}`
+
+const textErrEntities = `{
+	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
+	"Types" : [
+		"arkserde_test.Velocity",
+		"arkserde_test.ChildOf",
+		"arkserde_test.Position"
+	],
+	"Components" : [
+		{
+		"arkserde_test.Position" : {"X":3,"Y":4},
+		"arkserde_test.Velocity" : {"X":5,"Y":6},
+		"arkserde_test.ChildOf" : {"Entity":[1,0]}
+		}
+	],
+	"Resources" : {
+		"arkserde_test.Velocity" : {"X":1000,"Y":0}
+	}}`
+
+const textErrTypes = `{
+	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
+	"Types" : {"a": "b"},
+	"Components" : [
+		{
+		  "arkserde_test.Position" : {"X":1,"Y":2}
+		},
+		{
+		"arkserde_test.Position" : {"X":3,"Y":4},
+		"arkserde_test.Velocity" : {"X":5,"Y":6},
+		"arkserde_test.ChildOf" : {"Entity":[1,0]}
+		}
+	],
+	"Resources" : {
+		"arkserde_test.Velocity" : {"X":1000,"Y":0}
+	}}`
+
+const textErrComponent = `{
+	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
+	"Types" : [
+		"arkserde_test.Velocity",
+		"arkserde_test.ChildOf",
+		"arkserde_test.Position"
+	],
+	"Components" : [
+		[],
+		{
+		"arkserde_test.Position" : {"X":3,"Y":4},
+		"arkserde_test.Velocity" : {"X":5,"Y":6},
+		"arkserde_test.ChildOf" : {"Entity":[1,0]}
+		}
+	],
+	"Resources" : {
+		"arkserde_test.Velocity" : {"X":1000,"Y":0}
+	}}`
+
+const textErrComponent2 = `{
+	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
+	"Types" : [
+		"arkserde_test.Velocity",
+		"arkserde_test.ChildOf",
+		"arkserde_test.Position"
+	],
+	"Components" : [
+		{
+		  "arkserde_test.Position" : []
+		},
+		{
+		"arkserde_test.Position" : {"X":3,"Y":4},
+		"arkserde_test.Velocity" : {"X":5,"Y":6},
+		"arkserde_test.ChildOf" : {"Entity":[1,0]}
+		}
+	],
+	"Resources" : {
+		"arkserde_test.Velocity" : {"X":1000,"Y":0}
+	}}`
+
+const textErrRelation = `{
+	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
+	"Types" : [
+	  "arkserde_test.Position",
+	  "arkserde_test.ChildRelation"
+	],
+	"Components" : [
+	  {
+		"arkserde_test.Position" : {"X":1,"Y":2}
+	  },
+	  {
+		"arkserde_test.Position" : {"X":5,"Y":6},
+		"ark.relation.Target" : {},
+		"arkserde_test.ChildRelation" : {"Dummy":0}
+	  }
+	],
+	"Resources" : {
+	}}`
+
+const textErrResource = `{
+	"World" : {"Entities":[[0,4294967295], [1,4294967295]],"Alive":[],"Next":0,"Available":0},
+	"Types" : [],
+	"Components" : [],
+	"Resources" : {
+		"arkserde_test.Velocity" : []
+	}}`
