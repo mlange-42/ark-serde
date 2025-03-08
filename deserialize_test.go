@@ -27,7 +27,7 @@ func TestDeserializeSkipEntities(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := w.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 0)
 	query.Close()
@@ -57,7 +57,7 @@ func TestDeserializeSkipAllComponents(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := w.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 	query.Close()
@@ -91,7 +91,7 @@ func TestDeserializeSkipComponents(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := w.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 

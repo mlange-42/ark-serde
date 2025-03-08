@@ -77,7 +77,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 		return fmt.Errorf("found components for %d entities, but world has %d alive entities", len(deserial.Components), len(deserial.World.Alive))
 	}
 
-	skipComponents := ecs.Mask{}
+	skipComponents := bitMask{}
 	for _, tp := range opts.skipComponents {
 		id := ecs.TypeID(world, tp)
 		skipComponents.Set(id, true)
@@ -163,7 +163,7 @@ func deserializeResources(world *ecs.World, deserial *deserializer, opts *serdeO
 	resTypes := map[ecs.ResID]reflect.Type{}
 	resIds := map[string]ecs.ResID{}
 	allRes := ecs.ResourceIDs(world)
-	skipResources := ecs.Mask{}
+	skipResources := bitMask{}
 	for _, id := range allRes {
 		if tp, ok := ecs.ResourceType(world, id); ok {
 			resTypes[id] = tp

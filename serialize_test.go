@@ -24,7 +24,7 @@ type ChildOf struct {
 }
 
 type ChildRelation struct {
-	ecs.Relation
+	ecs.RelationMarker
 	Dummy int
 }
 
@@ -69,7 +69,6 @@ func TestSerialize(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	u := w.Unsafe()
 	posId := ecs.ComponentID[Position](&w)
 	velId := ecs.ComponentID[Velocity](&w)
 	childId := ecs.ComponentID[ChildOf](&w)
@@ -82,7 +81,7 @@ func TestSerialize(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := u.Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 
@@ -128,7 +127,7 @@ func TestSerializeSkipEntities(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := w.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 0)
 	query.Close()
@@ -155,7 +154,7 @@ func TestSerializeSkipAllComponents(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := w.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 	query.Close()
@@ -188,7 +187,7 @@ func TestSerializeSkipComponents(t *testing.T) {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := w.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(&w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 

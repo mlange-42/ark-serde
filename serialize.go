@@ -104,7 +104,7 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 		return nil
 	}
 
-	skipComponents := ecs.Mask{}
+	skipComponents := bitMask{}
 	for _, tp := range opts.skipComponents {
 		id := ecs.TypeID(world, tp)
 		skipComponents.Set(id, true)
@@ -112,7 +112,7 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 
 	builder.WriteString("\"Components\" : [\n")
 
-	query := world.Unsafe().Query(ecs.NewFilter())
+	query := ecs.NewFilter(world).Query()
 	lastEntity := query.Count() - 1
 	counter := 0
 	tempIDs := []ecs.ID{}
@@ -125,7 +125,8 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 			ids := query.IDs()
 
 			tempIDs = tempIDs[:0]
-			for _, id := range ids {
+			for i := range ids.Len() {
+				id := ids.Get(i)
 				if !skipComponents.Get(id) {
 					tempIDs = append(tempIDs, id)
 				}
