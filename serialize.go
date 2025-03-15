@@ -112,7 +112,7 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 
 	builder.WriteString("\"Components\" : [\n")
 
-	query := ecs.NewFilter(world).Query()
+	query := ecs.NewUnsafeFilter(world).Query()
 	lastEntity := query.Count() - 1
 	counter := 0
 	tempIDs := []ecs.ID{}
