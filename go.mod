@@ -3,7 +3,7 @@ module github.com/mlange-42/ark-serde
 go 1.24.0
 
 require (
-	github.com/mlange-42/ark v0.3.1-0.20250315233917-386a45924ded
+	github.com/mlange-42/ark v0.4.0
 	github.com/stretchr/testify v1.10.0
 )
 
