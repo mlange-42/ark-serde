@@ -1,7 +1,10 @@
 package arkserde
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
+	"io"
 	"reflect"
 	"slices"
 	"strings"
@@ -9,6 +12,23 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/mlange-42/ark/ecs"
 )
+
+// DeserializeGZip de-serializes an Ark [ecs.World] from gzipped JSON.
+func DeserializeGZip(jsonData []byte, world *ecs.World, options ...Option) error {
+	reader, err := gzip.NewReader(bytes.NewReader(jsonData))
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	var buffer bytes.Buffer
+	_, err = io.Copy(&buffer, reader)
+	if err != nil {
+		return err
+	}
+
+	return Deserialize(buffer.Bytes(), world, options...)
+}
 
 // Deserialize an Ark [ecs.World] from JSON.
 //

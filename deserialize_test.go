@@ -234,6 +234,29 @@ func createWorld(vel bool) *ecs.World {
 	return &world
 }
 
+func TestDeserializeGZip(t *testing.T) {
+	world := ecs.NewWorld(1024)
+
+	builder := ecs.NewMap2[Position, Velocity](&world)
+	builder.NewBatchFn(100, nil)
+
+	dataGz, err := arkserde.SerializeGZip(&world)
+	assert.Nil(t, err)
+
+	world1 := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&world1)
+	_ = ecs.ComponentID[Velocity](&world1)
+
+	err = arkserde.DeserializeGZip(dataGz, &world1)
+	assert.Nil(t, err)
+
+	filter := ecs.NewFilter0(&world1)
+	query := filter.Query()
+	assert.Equal(t, 100, query.Count())
+
+	query.Close()
+}
+
 const textOk = `{
 	"World" : {"Entities":[[0,4294967295],[1,4294967295],[2,0],[3,0]],"Alive":[2,3],"Next":0,"Available":0},
 	"Types" : [
