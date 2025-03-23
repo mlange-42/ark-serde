@@ -1,6 +1,6 @@
 # Changelog
 
-## [[unpublished]](https://github.com/mlange-42/ark-serde/compare/v0.1.3...main)
+## [[v0.2.0]](https://github.com/mlange-42/ark-serde/compare/v0.1.3...v0.2.0)
 
 ### Features
 
