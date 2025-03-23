@@ -1,8 +1,6 @@
 package arkserde
 
 import (
-	"bytes"
-	"compress/gzip"
 	"fmt"
 	"reflect"
 	"slices"
@@ -11,29 +9,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/mlange-42/ark/ecs"
 )
-
-// SerializeGZip serializes an Ark [ecs.World] to gzipped JSON.
-func SerializeGZip(world *ecs.World, options ...Option) ([]byte, error) {
-	data, err := Serialize(world, options...)
-	if err != nil {
-		return nil, err
-	}
-
-	var buffer bytes.Buffer
-	writer := gzip.NewWriter(&buffer)
-
-	_, err = writer.Write(data)
-	if err != nil {
-		return nil, err
-	}
-
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	return buffer.Bytes(), nil
-}
 
 // Serialize an Ark [ecs.World] to JSON.
 //
@@ -73,7 +48,16 @@ func Serialize(world *ecs.World, options ...Option) ([]byte, error) {
 	}
 	builder.WriteString("}\n")
 
-	return []byte(builder.String()), nil
+	data := []byte(builder.String())
+	if opts.compressed {
+		var err error
+		data, err = compressGZip(data, opts.compressionLevel)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return data, nil
 }
 
 func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptions) error {

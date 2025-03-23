@@ -240,14 +240,14 @@ func TestDeserializeGZip(t *testing.T) {
 	builder := ecs.NewMap2[Position, Velocity](&world)
 	builder.NewBatchFn(100, nil)
 
-	dataGz, err := arkserde.SerializeGZip(&world)
+	dataGz, err := arkserde.Serialize(&world, arkserde.Opts.Compress())
 	assert.Nil(t, err)
 
 	world1 := ecs.NewWorld(1024)
 	_ = ecs.ComponentID[Position](&world1)
 	_ = ecs.ComponentID[Velocity](&world1)
 
-	err = arkserde.DeserializeGZip(dataGz, &world1)
+	err = arkserde.Deserialize(dataGz, &world1, arkserde.Opts.Compress())
 	assert.Nil(t, err)
 
 	filter := ecs.NewFilter0(&world1)
