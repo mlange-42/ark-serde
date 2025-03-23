@@ -1,5 +1,9 @@
 # Changelog
 
+## [[unpublished]](https://github.com/mlange-42/ark-serde/compare/v0.1.2...main)
+
+- Adds benchmarks for serialization and de-serialization (#12)
+
 ## [[v0.1.2]](https://github.com/mlange-42/ark-serde/compare/v0.1.1...v0.1.2)
 
 - Upgrade to Ark v0.4.0 (#9, #10)

@@ -339,3 +339,34 @@ func TestSerializeGeneric(t *testing.T) {
 
 	_, _, _ = e1, e2, e3
 }
+
+func benchmarkSerializeJSON(n int, b *testing.B) {
+	w := ecs.NewWorld(1024)
+
+	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper.NewBatchFn(n, nil)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := arkserde.Serialize(&w)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+}
+
+func BenchmarkSerializeJSON_100(b *testing.B) {
+	benchmarkSerializeJSON(100, b)
+}
+
+func BenchmarkSerializeJSON_1000(b *testing.B) {
+	benchmarkSerializeJSON(1000, b)
+}
+
+func BenchmarkSerializeJSON_10000(b *testing.B) {
+	benchmarkSerializeJSON(10000, b)
+}
+
+func BenchmarkSerializeJSON_100000(b *testing.B) {
+	benchmarkSerializeJSON(100000, b)
+}

@@ -358,3 +358,52 @@ const textErrResource = `{
 	"Resources" : {
 		"arkserde_test.Velocity" : []
 	}}`
+
+func benchmarkDeserializeJSON(n int, b *testing.B) {
+	w := ecs.NewWorld(1024)
+
+	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper.NewBatchFn(n, nil)
+
+	jsonData, err := arkserde.Serialize(&w)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	w2 := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&w2)
+	_ = ecs.ComponentID[Velocity](&w2)
+
+	err = arkserde.Deserialize(jsonData, &w2)
+	if err != nil {
+		panic(err.Error())
+	}
+	w2.Reset()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = arkserde.Deserialize(jsonData, &w2)
+		if err != nil {
+			panic(err.Error())
+		}
+		b.StopTimer()
+		w2.Reset()
+		b.StartTimer()
+	}
+}
+
+func BenchmarkDeserializeJSON_100(b *testing.B) {
+	benchmarkDeserializeJSON(100, b)
+}
+
+func BenchmarkDeserializeJSON_1000(b *testing.B) {
+	benchmarkDeserializeJSON(1000, b)
+}
+
+func BenchmarkDeserializeJSON_10000(b *testing.B) {
+	benchmarkDeserializeJSON(10000, b)
+}
+
+func BenchmarkDeserializeJSON_100000(b *testing.B) {
+	benchmarkDeserializeJSON(100000, b)
+}
