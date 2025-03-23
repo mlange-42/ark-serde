@@ -2,7 +2,14 @@
 
 ## [[unpublished]](https://github.com/mlange-42/ark-serde/compare/v0.1.2...main)
 
+### Documentation
+
 - Adds benchmarks for serialization and de-serialization (#12)
+
+### Performance
+
+- Adds a sub-project to profile (de)-serialization (#13)
+- Slightly speeds up deserialization ba using a slice instead of a map for component infos (#13)
 
 ## [[v0.1.2]](https://github.com/mlange-42/ark-serde/compare/v0.1.1...v0.1.2)
 
