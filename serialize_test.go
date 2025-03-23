@@ -370,3 +370,34 @@ func BenchmarkSerializeJSON_10000(b *testing.B) {
 func BenchmarkSerializeJSON_100000(b *testing.B) {
 	benchmarkSerializeJSON(100000, b)
 }
+
+func benchmarkSerializeGZIP(n int, b *testing.B) {
+	w := ecs.NewWorld(1024)
+
+	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper.NewBatchFn(n, nil)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := arkserde.Serialize(&w, arkserde.Opts.Compress())
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+}
+
+func BenchmarkSerializeGZIP_100(b *testing.B) {
+	benchmarkSerializeGZIP(100, b)
+}
+
+func BenchmarkSerializeGZIP_1000(b *testing.B) {
+	benchmarkSerializeGZIP(1000, b)
+}
+
+func BenchmarkSerializeGZIP_10000(b *testing.B) {
+	benchmarkSerializeGZIP(10000, b)
+}
+
+func BenchmarkSerializeGZIP_100000(b *testing.B) {
+	benchmarkSerializeGZIP(100000, b)
+}

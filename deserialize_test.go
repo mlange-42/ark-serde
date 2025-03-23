@@ -432,6 +432,51 @@ func BenchmarkDeserializeJSON_10000(b *testing.B) {
 	benchmarkDeserializeJSON(10000, b)
 }
 
-func BenchmarkDeserializeJSON_100000(b *testing.B) {
-	benchmarkDeserializeJSON(100000, b)
+func benchmarkDeserializeGZIP(n int, b *testing.B) {
+	w := ecs.NewWorld(1024)
+
+	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper.NewBatchFn(n, nil)
+
+	jsonData, err := arkserde.Serialize(&w, arkserde.Opts.Compress())
+	if err != nil {
+		panic(err.Error())
+	}
+
+	w2 := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&w2)
+	_ = ecs.ComponentID[Velocity](&w2)
+
+	err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
+	if err != nil {
+		panic(err.Error())
+	}
+	w2.Reset()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
+		if err != nil {
+			panic(err.Error())
+		}
+		b.StopTimer()
+		w2.Reset()
+		b.StartTimer()
+	}
+}
+
+func BenchmarkDeserializeGZIP_100(b *testing.B) {
+	benchmarkDeserializeGZIP(100, b)
+}
+
+func BenchmarkDeserializeGZIP_1000(b *testing.B) {
+	benchmarkDeserializeGZIP(1000, b)
+}
+
+func BenchmarkDeserializeGZIP_10000(b *testing.B) {
+	benchmarkDeserializeGZIP(10000, b)
+}
+
+func BenchmarkDeserializeGZIP_100000(b *testing.B) {
+	benchmarkDeserializeGZIP(100000, b)
 }
