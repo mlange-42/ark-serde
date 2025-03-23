@@ -166,7 +166,7 @@ func TestDeserializeErrors(t *testing.T) {
 	world := createWorld(false)
 
 	err := arkserde.Deserialize([]byte("{xxx}"), world)
-	assert.Contains(t, err.Error(), "invalid character 'x'")
+	assert.Contains(t, err.Error(), "invalid char")
 
 	err = arkserde.Deserialize([]byte(textOk), world)
 	assert.Contains(t, err.Error(), "component type is not registered")
@@ -198,27 +198,26 @@ func TestDeserializeErrors(t *testing.T) {
 	velAccess = ecs.NewResource[Velocity](world)
 	velAccess.Add(&Velocity{})
 	err = arkserde.Deserialize([]byte(textErrTypes), world)
-	assert.Contains(t, err.Error(), "cannot unmarshal object")
+	assert.Contains(t, err.Error(), "mismatched type with value")
 
 	world = createWorld(true)
 	velAccess = ecs.NewResource[Velocity](world)
 	velAccess.Add(&Velocity{})
 	err = arkserde.Deserialize([]byte(textErrComponent), world)
-	assert.Contains(t, err.Error(), "cannot unmarshal array")
+	assert.Contains(t, err.Error(), "Mismatch type map[string]arkserde.entry with value array")
 
 	world = createWorld(true)
 	velAccess = ecs.NewResource[Velocity](world)
 	velAccess.Add(&Velocity{})
 	err = arkserde.Deserialize([]byte(textErrComponent2), world)
-	fmt.Println(err)
-	assert.Contains(t, err.Error(), "cannot unmarshal array")
+	assert.Contains(t, err.Error(), "mismatched type with value")
 
 	world = createWorld(true)
 	velAccess = ecs.NewResource[Velocity](world)
 	velAccess.Add(&Velocity{})
 	err = arkserde.Deserialize([]byte(textErrResource), world)
 	fmt.Println(err)
-	assert.Contains(t, err.Error(), "cannot unmarshal array")
+	assert.Contains(t, err.Error(), "mismatched type with value")
 
 	world = createWorld(true)
 	err = arkserde.Deserialize([]byte(textErrRelation), world)

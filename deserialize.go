@@ -1,12 +1,12 @@
 package arkserde
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"slices"
 	"strings"
 
+	"github.com/bytedance/sonic"
 	"github.com/mlange-42/ark/ecs"
 )
 
@@ -32,7 +32,7 @@ func Deserialize(jsonData []byte, world *ecs.World, options ...Option) error {
 	opts := newSerdeOptions(options...)
 
 	deserial := deserializer{}
-	if err := json.Unmarshal(jsonData, &deserial); err != nil {
+	if err := sonic.Unmarshal(jsonData, &deserial); err != nil {
 		return err
 	}
 
@@ -88,7 +88,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 
 		mp := map[string]entry{}
 
-		if err := json.Unmarshal(comps.Bytes, &mp); err != nil {
+		if err := sonic.Unmarshal(comps.Bytes, &mp); err != nil {
 			return err
 		}
 
@@ -101,7 +101,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 		for tpName, value := range mp {
 			if strings.HasSuffix(tpName, targetTag) {
 				var target ecs.Entity
-				if err := json.Unmarshal(value.Bytes, &target); err != nil {
+				if err := sonic.Unmarshal(value.Bytes, &target); err != nil {
 					return err
 				}
 				targetsMap[strings.TrimSuffix(tpName, targetTag)] = target
@@ -120,7 +120,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			}
 
 			comp := reflect.New(info.Type).Interface()
-			if err := json.Unmarshal(value.Bytes, &comp); err != nil {
+			if err := sonic.Unmarshal(value.Bytes, &comp); err != nil {
 				return err
 			}
 			compIDs = append(compIDs, id)
@@ -194,7 +194,7 @@ func deserializeResources(world *ecs.World, deserial *deserializer, opts *serdeO
 		ptr := reflect.ValueOf(resLoc).UnsafePointer()
 		value := reflect.NewAt(tp, ptr).Interface()
 
-		if err := json.Unmarshal(res.Bytes, &value); err != nil {
+		if err := sonic.Unmarshal(res.Bytes, &value); err != nil {
 			return err
 		}
 	}

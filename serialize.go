@@ -1,12 +1,12 @@
 package arkserde
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"slices"
 	"strings"
 
+	"github.com/bytedance/sonic"
 	"github.com/mlange-42/ark/ecs"
 )
 
@@ -58,7 +58,7 @@ func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 
 	entities := world.Unsafe().DumpEntities()
 
-	jsonData, err := json.Marshal(entities)
+	jsonData, err := sonic.Marshal(entities)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 
 				comp := query.Get(id)
 				value := reflect.NewAt(info.Type, comp).Interface()
-				jsonData, err := json.Marshal(value)
+				jsonData, err := sonic.Marshal(value)
 				if err != nil {
 					return err
 				}
@@ -198,7 +198,7 @@ func serializeResources(world *ecs.World, builder *strings.Builder, opts *serdeO
 		ptr := rValue.UnsafePointer()
 
 		value := reflect.NewAt(tp, ptr).Interface()
-		jsonData, err := json.Marshal(value)
+		jsonData, err := sonic.Marshal(value)
 		if err != nil {
 			return err
 		}
