@@ -57,12 +57,12 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 		return nil
 	}
 
-	infos := map[ecs.ID]ecs.CompInfo{}
 	ids := map[string]ecs.ID{}
 	allComps := ecs.ComponentIDs(world)
+	infos := make([]ecs.CompInfo, len(allComps))
 	for _, id := range allComps {
 		if info, ok := ecs.ComponentInfo(world, id); ok {
-			infos[id] = info
+			infos[id.Index()] = info
 			ids[info.Type.String()] = id
 		}
 	}
@@ -113,7 +113,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 				continue
 			}
 
-			info := infos[id]
+			info := infos[id.Index()]
 
 			if info.IsRelation {
 				idsMap[tpName] = id
