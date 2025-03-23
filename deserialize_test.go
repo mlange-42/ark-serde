@@ -221,6 +221,10 @@ func TestDeserializeErrors(t *testing.T) {
 	world = createWorld(true)
 	err = arkserde.Deserialize([]byte(textErrRelation), world)
 	assert.Contains(t, err.Error(), "cannot unmarshal object into Go value of type [2]uint32")
+
+	world = createWorld(true)
+	err = arkserde.Deserialize([]byte("abc"), world, arkserde.Opts.Compress())
+	assert.Contains(t, err.Error(), "unexpected EOF")
 }
 
 func createWorld(vel bool) *ecs.World {
