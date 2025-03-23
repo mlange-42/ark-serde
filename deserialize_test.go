@@ -436,6 +436,10 @@ func BenchmarkDeserializeJSON_10000(b *testing.B) {
 	benchmarkDeserializeJSON(10000, b)
 }
 
+func BenchmarkDeserializeJSON_100000(b *testing.B) {
+	benchmarkDeserializeJSON(100000, b)
+}
+
 func benchmarkDeserializeGZIP(n int, b *testing.B) {
 	w := ecs.NewWorld(1024)
 
