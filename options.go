@@ -26,9 +26,11 @@ type Option func(o *serdeOptions)
 type Options struct{}
 
 // Compress data using gzip.
-// For serialization data created with this option,
-// the option must also be used for de-serialization.
-// The optional compression level argument has no effect when de-serializing.
+// For serialized data created with this option,
+// the option must also be used for deserialization.
+// The optional compression level argument has no effect when deserializing.
+//
+// Ideally, save as <file>.json.gz instead of <file>.json.
 func (o Options) Compress(level ...int) Option {
 	l := DefaultCompression
 	if len(level) == 1 {
