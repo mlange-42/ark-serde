@@ -221,6 +221,10 @@ func TestDeserializeErrors(t *testing.T) {
 	world = createWorld(true)
 	err = arkserde.Deserialize([]byte(textErrRelation), world)
 	assert.Contains(t, err.Error(), "cannot unmarshal object into Go value of type [2]uint32")
+
+	world = createWorld(true)
+	err = arkserde.Deserialize([]byte("abc"), world, arkserde.Opts.Compress())
+	assert.Contains(t, err.Error(), "unexpected EOF")
 }
 
 func createWorld(vel bool) *ecs.World {
@@ -232,6 +236,46 @@ func createWorld(vel bool) *ecs.World {
 		_ = ecs.ComponentID[Velocity](&world)
 	}
 	return &world
+}
+
+func TestDeserializeGZip(t *testing.T) {
+	world := ecs.NewWorld(1024)
+
+	builder := ecs.NewMap2[Position, Velocity](&world)
+	cnt := 0
+	builder.NewBatchFn(100, func(entity ecs.Entity, pos *Position, _ *Velocity) {
+		pos.X = float64(cnt)
+		cnt++
+	})
+
+	dataGz, err := arkserde.Serialize(&world, arkserde.Opts.Compress())
+	assert.Nil(t, err)
+
+	dataNoGz, err := arkserde.Serialize(&world)
+	assert.Nil(t, err)
+
+	assert.Less(t, len(dataGz), len(dataNoGz))
+	fmt.Println("Uncompressed bytes:", len(dataNoGz))
+	fmt.Println("Compressed bytes:  ", len(dataGz))
+
+	world1 := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&world1)
+	_ = ecs.ComponentID[Velocity](&world1)
+
+	err = arkserde.Deserialize(dataGz, &world1, arkserde.Opts.Compress())
+	assert.Nil(t, err)
+
+	filter := ecs.NewFilter2[Position, Velocity](&world1)
+	query := filter.Query()
+	assert.Equal(t, 100, query.Count())
+
+	cnt = 0
+	for query.Next() {
+		pos, _ := query.Get()
+		assert.EqualValues(t, cnt, pos.X)
+		cnt++
+	}
+	assert.Equal(t, 100, cnt)
 }
 
 const textOk = `{
@@ -404,4 +448,53 @@ func BenchmarkDeserializeJSON_10000(b *testing.B) {
 
 func BenchmarkDeserializeJSON_100000(b *testing.B) {
 	benchmarkDeserializeJSON(100000, b)
+}
+
+func benchmarkDeserializeGZIP(n int, b *testing.B) {
+	w := ecs.NewWorld(1024)
+
+	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper.NewBatchFn(n, nil)
+
+	jsonData, err := arkserde.Serialize(&w, arkserde.Opts.Compress())
+	if err != nil {
+		panic(err.Error())
+	}
+
+	w2 := ecs.NewWorld(1024)
+	_ = ecs.ComponentID[Position](&w2)
+	_ = ecs.ComponentID[Velocity](&w2)
+
+	err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
+	if err != nil {
+		panic(err.Error())
+	}
+	w2.Reset()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
+		if err != nil {
+			panic(err.Error())
+		}
+		b.StopTimer()
+		w2.Reset()
+		b.StartTimer()
+	}
+}
+
+func BenchmarkDeserializeGZIP_100(b *testing.B) {
+	benchmarkDeserializeGZIP(100, b)
+}
+
+func BenchmarkDeserializeGZIP_1000(b *testing.B) {
+	benchmarkDeserializeGZIP(1000, b)
+}
+
+func BenchmarkDeserializeGZIP_10000(b *testing.B) {
+	benchmarkDeserializeGZIP(10000, b)
+}
+
+func BenchmarkDeserializeGZIP_100000(b *testing.B) {
+	benchmarkDeserializeGZIP(100000, b)
 }

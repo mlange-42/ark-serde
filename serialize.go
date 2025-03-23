@@ -48,7 +48,16 @@ func Serialize(world *ecs.World, options ...Option) ([]byte, error) {
 	}
 	builder.WriteString("}\n")
 
-	return []byte(builder.String()), nil
+	data := []byte(builder.String())
+	if opts.compressed {
+		var err error
+		data, err = compressGZip(data, opts.compressionLevel)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return data, nil
 }
 
 func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptions) error {

@@ -31,6 +31,14 @@ import (
 func Deserialize(jsonData []byte, world *ecs.World, options ...Option) error {
 	opts := newSerdeOptions(options...)
 
+	if opts.compressed {
+		var err error
+		jsonData, err = uncompressGZip(jsonData)
+		if err != nil {
+			return err
+		}
+	}
+
 	deserial := deserializer{}
 	if err := json.Unmarshal(jsonData, &deserial); err != nil {
 		return err

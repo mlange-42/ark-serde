@@ -1,9 +1,17 @@
 package arkserde
 
 import (
+	"compress/flate"
 	"reflect"
 
 	"github.com/mlange-42/ark/ecs"
+)
+
+// GZip compression level, re-exported from the flate package
+const (
+	BestSpeed          = flate.BestSpeed
+	BestCompression    = flate.BestCompression
+	DefaultCompression = flate.DefaultCompression
 )
 
 // Opts is a helper to create Option instances.
@@ -16,6 +24,24 @@ type Option func(o *serdeOptions)
 // Options is a helper to create Option instances.
 // Use it via the instance [Opts].
 type Options struct{}
+
+// Compress data using gzip.
+// For serialization data created with this option,
+// the option must also be used for de-serialization.
+// The optional compression level argument has no effect when de-serializing.
+func (o Options) Compress(level ...int) Option {
+	l := DefaultCompression
+	if len(level) == 1 {
+		l = level[0]
+	} else if len(level) != 0 {
+		panic("maximum one value allowed for compression level")
+	}
+
+	return func(o *serdeOptions) {
+		o.compressed = true
+		o.compressionLevel = l
+	}
+}
 
 // SkipAllResources skips serialization or de-serialization of all resources.
 func (o Options) SkipAllResources() Option {
@@ -66,6 +92,9 @@ type serdeOptions struct {
 	skipAllResources  bool
 	skipAllComponents bool
 	skipEntities      bool
+
+	compressed       bool
+	compressionLevel int
 
 	skipComponents []reflect.Type
 	skipResources  []reflect.Type
