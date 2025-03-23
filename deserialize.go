@@ -1,6 +1,7 @@
 package arkserde
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"slices"
@@ -31,8 +32,11 @@ import (
 func Deserialize(jsonData []byte, world *ecs.World, options ...Option) error {
 	opts := newSerdeOptions(options...)
 
+	buffer := bytes.NewReader(jsonData)
+	decoder := json.NewDecoder(buffer)
+
 	deserial := deserializer{}
-	if err := json.Unmarshal(jsonData, &deserial); err != nil {
+	if err := decoder.Decode(&deserial); err != nil {
 		return err
 	}
 
@@ -88,7 +92,10 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 
 		mp := map[string]entry{}
 
-		if err := json.Unmarshal(comps.Bytes, &mp); err != nil {
+		buffer := bytes.NewReader(comps.Bytes)
+		decoder := json.NewDecoder(buffer)
+
+		if err := decoder.Decode(&mp); err != nil {
 			return err
 		}
 
@@ -119,8 +126,11 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 				idsMap[tpName] = id
 			}
 
+			buffer := bytes.NewReader(value.Bytes)
+			decoder := json.NewDecoder(buffer)
+
 			comp := reflect.New(info.Type).Interface()
-			if err := json.Unmarshal(value.Bytes, &comp); err != nil {
+			if err := decoder.Decode(&comp); err != nil {
 				return err
 			}
 			compIDs = append(compIDs, id)
