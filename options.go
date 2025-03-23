@@ -25,7 +25,10 @@ type Option func(o *serdeOptions)
 // Use it via the instance [Opts].
 type Options struct{}
 
-// Compress enables gzip compression.
+// Compress data using gzip.
+// For serialization data created with this option,
+// the option must also be used for de-serialization.
+// The optional compression level argument has no effect when de-serializing.
 func (o Options) Compress(level ...int) Option {
 	l := DefaultCompression
 	if len(level) == 1 {

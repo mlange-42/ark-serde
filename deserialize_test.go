@@ -243,6 +243,13 @@ func TestDeserializeGZip(t *testing.T) {
 	dataGz, err := arkserde.Serialize(&world, arkserde.Opts.Compress())
 	assert.Nil(t, err)
 
+	dataNoGz, err := arkserde.Serialize(&world)
+	assert.Nil(t, err)
+
+	assert.Less(t, len(dataGz), len(dataNoGz))
+	fmt.Println("Uncompressed bytes:", len(dataNoGz))
+	fmt.Println("Compressed bytes:  ", len(dataGz))
+
 	world1 := ecs.NewWorld(1024)
 	_ = ecs.ComponentID[Position](&world1)
 	_ = ecs.ComponentID[Velocity](&world1)
