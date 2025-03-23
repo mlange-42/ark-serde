@@ -1,5 +1,11 @@
 # Changelog
 
+## [[unpublished]](https://github.com/mlange-42/ark-serde/compare/v0.1.3...main)
+
+### Features
+
+- Adds option `Compress` for in-memory gzip compression (#18)
+
 ## [[v0.1.3]](https://github.com/mlange-42/ark-serde/compare/v0.1.2...v0.1.3)
 
 ### Documentation
