@@ -1,6 +1,7 @@
 package arkserde
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"slices"
@@ -58,11 +59,14 @@ func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 
 	entities := world.Unsafe().DumpEntities()
 
-	jsonData, err := json.Marshal(entities)
+	buffer := bytes.NewBuffer(nil)
+	encoder := json.NewEncoder(buffer)
+
+	err := encoder.Encode(entities)
 	if err != nil {
 		return err
 	}
-	builder.WriteString(fmt.Sprintf("\"World\" : %s", string(jsonData)))
+	builder.WriteString(fmt.Sprintf("\"World\" : %s", string(buffer.Bytes())))
 	return nil
 }
 
@@ -197,15 +201,18 @@ func serializeResources(world *ecs.World, builder *strings.Builder, opts *serdeO
 		rValue := reflect.ValueOf(res)
 		ptr := rValue.UnsafePointer()
 
+		buffer := bytes.NewBuffer(nil)
+		encoder := json.NewEncoder(buffer)
+
 		value := reflect.NewAt(tp, ptr).Interface()
-		jsonData, err := json.Marshal(value)
+		err := encoder.Encode(value)
 		if err != nil {
 			return err
 		}
 
 		builder.WriteString("    ")
 		builder.WriteString(fmt.Sprintf("\"%s\" : ", tp.String()))
-		builder.WriteString(string(jsonData))
+		builder.WriteString(string(buffer.Bytes()))
 
 		if counter < last {
 			builder.WriteString(",")
