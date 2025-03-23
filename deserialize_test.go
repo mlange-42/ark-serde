@@ -242,7 +242,11 @@ func TestDeserializeGZip(t *testing.T) {
 	world := ecs.NewWorld(1024)
 
 	builder := ecs.NewMap2[Position, Velocity](&world)
-	builder.NewBatchFn(100, nil)
+	cnt := 0
+	builder.NewBatchFn(100, func(entity ecs.Entity, pos *Position, _ *Velocity) {
+		pos.X = float64(cnt)
+		cnt++
+	})
 
 	dataGz, err := arkserde.Serialize(&world, arkserde.Opts.Compress())
 	assert.Nil(t, err)
@@ -261,11 +265,17 @@ func TestDeserializeGZip(t *testing.T) {
 	err = arkserde.Deserialize(dataGz, &world1, arkserde.Opts.Compress())
 	assert.Nil(t, err)
 
-	filter := ecs.NewFilter0(&world1)
+	filter := ecs.NewFilter2[Position, Velocity](&world1)
 	query := filter.Query()
 	assert.Equal(t, 100, query.Count())
 
-	query.Close()
+	cnt = 0
+	for query.Next() {
+		pos, _ := query.Get()
+		assert.EqualValues(t, cnt, pos.X)
+		cnt++
+	}
+	assert.Equal(t, 100, cnt)
 }
 
 const textOk = `{
