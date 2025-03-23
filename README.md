@@ -19,9 +19,10 @@
 
 ## Features
 
-* Serialize/deserialize an entire *Ark* world in one line.
-* Proper serialization of entity relations, as well as of entities stored in components.
-* Skip arbitrary components and resources when serializing or deserializing.
+- Serialize/deserialize an entire Ark world in one line.
+- Proper serialization of entity relations, as well as of entities stored in components.
+- Skip arbitrary components and resources when serializing or deserializing.
+- Optional in-memory GZIP compression for vast reduction of file sizes.
 
 ## Installation
 
