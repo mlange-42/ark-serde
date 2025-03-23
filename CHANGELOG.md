@@ -10,6 +10,7 @@
 
 - Adds a sub-project to profile (de)-serialization (#13)
 - Slightly speeds up deserialization ba using a slice instead of a map for component infos (#13)
+- Speed up by up to factor 2 by replacing `encoding/json` with `goccy/go-json` (#15)
 
 ## [[v0.1.2]](https://github.com/mlange-42/ark-serde/compare/v0.1.1...v0.1.2)
 
