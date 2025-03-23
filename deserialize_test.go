@@ -216,7 +216,6 @@ func TestDeserializeErrors(t *testing.T) {
 	velAccess = ecs.NewResource[Velocity](world)
 	velAccess.Add(&Velocity{})
 	err = arkserde.Deserialize([]byte(textErrResource), world)
-	fmt.Println(err)
 	assert.Contains(t, err.Error(), "invalid character '[' looking for beginning of value")
 
 	world = createWorld(true)
