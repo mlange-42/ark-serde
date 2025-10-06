@@ -31,7 +31,11 @@ func uncompressGZip(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
+	defer func() {
+		if err := reader.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	var buffer bytes.Buffer
 	_, err = io.Copy(&buffer, reader)

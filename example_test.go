@@ -106,7 +106,7 @@ func printWorld(world *ecs.World) {
 		grid[coords.Y][coords.X] = 'O'
 	}
 
-	for i := 0; i < len(grid); i++ {
+	for i := range grid {
 		fmt.Println(string(grid[i]))
 	}
 }
