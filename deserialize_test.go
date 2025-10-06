@@ -2,7 +2,9 @@ package arkserde_test
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
+	"time"
 
 	arkserde "github.com/mlange-42/ark-serde"
 	"github.com/mlange-42/ark/ecs"
@@ -276,6 +278,28 @@ func TestDeserializeGZip(t *testing.T) {
 		cnt++
 	}
 	assert.Equal(t, 100, cnt)
+}
+
+type Rand struct {
+	rand.Source
+}
+
+func TestDeserializeRandSource(t *testing.T) {
+	world := ecs.NewWorld(1024)
+	ecs.AddResource(&world, &Rand{Source: rand.NewPCG(0, uint64(time.Now().UnixNano()))})
+
+	js, err := arkserde.Serialize(&world, arkserde.Opts.SkipResources(ecs.C[Rand]()))
+	assert.Nil(t, err)
+
+	fmt.Println(string(js))
+
+	world2 := ecs.NewWorld(1024)
+	ecs.AddResource(&world2, &Rand{Source: rand.NewPCG(0, uint64(time.Now().UnixNano()))})
+	err = arkserde.Deserialize(js, &world2)
+	if err != nil {
+		panic(err)
+	}
+	assert.Nil(t, err)
 }
 
 const textOk = `{

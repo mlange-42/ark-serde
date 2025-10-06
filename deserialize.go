@@ -142,7 +142,7 @@ func deserializeComponents(world *ecs.World, deserial *deserializer, opts *serde
 			continue
 		}
 
-		relations := []ecs.RelationID{}
+		relations := []ecs.Relation{}
 		for name, id := range idsMap {
 			relations = append(relations, ecs.RelID(id, targetsMap[name]))
 		}
