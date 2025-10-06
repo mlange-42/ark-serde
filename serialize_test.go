@@ -346,8 +346,7 @@ func benchmarkSerializeJSON(n int, b *testing.B) {
 	mapper := ecs.NewMap2[Position, Velocity](&w)
 	mapper.NewBatchFn(n, nil)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := arkserde.Serialize(&w)
 		if err != nil {
 			panic(err.Error())
@@ -377,8 +376,7 @@ func benchmarkSerializeGZIP(n int, b *testing.B) {
 	mapper := ecs.NewMap2[Position, Velocity](&w)
 	mapper.NewBatchFn(n, nil)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := arkserde.Serialize(&w, arkserde.Opts.Compress())
 		if err != nil {
 			panic(err.Error())

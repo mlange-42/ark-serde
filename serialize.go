@@ -71,7 +71,7 @@ func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 	if err != nil {
 		return err
 	}
-	builder.WriteString(fmt.Sprintf("\"World\" : %s", string(jsonData)))
+	fmt.Fprintf(builder, "\"World\" : %s", string(jsonData))
 	return nil
 }
 
@@ -96,7 +96,7 @@ func serializeTypes(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 	maxComp := len(types) - 1
 	counter := 0
 	for _, tp := range types {
-		builder.WriteString(fmt.Sprintf("  \"%s\"", tp.String()))
+		fmt.Fprintf(builder, "  \"%s\"", tp.String())
 		if counter < maxComp {
 			builder.WriteString(",")
 		}
@@ -151,7 +151,7 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 					if err != nil {
 						return err
 					}
-					builder.WriteString(fmt.Sprintf("    \"%s%s\" : %s,\n", info.Type.String(), targetTag, eJSON))
+					fmt.Fprintf(builder, "    \"%s%s\" : %s,\n", info.Type.String(), targetTag, eJSON)
 				}
 
 				comp := query.Get(id)
@@ -160,8 +160,8 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 				if err != nil {
 					return err
 				}
-				builder.WriteString(fmt.Sprintf("    \"%s\" : ", info.Type.String()))
-				builder.WriteString(string(jsonData))
+				fmt.Fprintf(builder, "    \"%s\" : ", info.Type.String())
+				fmt.Fprint(builder, string(jsonData))
 				if i < last {
 					builder.WriteString(",")
 				}
@@ -212,9 +212,9 @@ func serializeResources(world *ecs.World, builder *strings.Builder, opts *serdeO
 			return err
 		}
 
-		builder.WriteString("    ")
-		builder.WriteString(fmt.Sprintf("\"%s\" : ", tp.String()))
-		builder.WriteString(string(jsonData))
+		fmt.Fprint(builder, "    ")
+		fmt.Fprintf(builder, "\"%s\" : ", tp.String())
+		fmt.Fprint(builder, string(jsonData))
 
 		if counter < last {
 			builder.WriteString(",")

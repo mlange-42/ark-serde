@@ -34,4 +34,5 @@ func Example_options() {
 		fmt.Printf("could not deserialize: %s\n", err)
 		return
 	}
+	// Output:
 }

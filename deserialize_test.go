@@ -422,8 +422,7 @@ func benchmarkDeserializeJSON(n int, b *testing.B) {
 	}
 	w2.Reset()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		err = arkserde.Deserialize(jsonData, &w2)
 		if err != nil {
 			panic(err.Error())
@@ -471,8 +470,7 @@ func benchmarkDeserializeGZIP(n int, b *testing.B) {
 	}
 	w2.Reset()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
 		if err != nil {
 			panic(err.Error())
