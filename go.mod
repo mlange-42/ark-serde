@@ -1,11 +1,11 @@
 module github.com/mlange-42/ark-serde
 
-go 1.24.1
+go 1.24
 
 require (
 	github.com/goccy/go-json v0.10.5
-	github.com/mlange-42/ark v0.4.0
-	github.com/stretchr/testify v1.10.0
+	github.com/mlange-42/ark v0.6.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
