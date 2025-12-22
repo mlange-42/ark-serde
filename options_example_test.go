@@ -9,12 +9,12 @@ import (
 
 func Example_options() {
 	world := ecs.NewWorld(1024)
-	builder := ecs.NewMap2[Position, Velocity](&world)
+	builder := ecs.NewMap2[Position, Velocity](world)
 	builder.NewBatch(10, &Position{}, &Velocity{})
 
 	// Serialize the world, skipping Velocity and compressing with gzip.
 	jsonData, err := arkserde.Serialize(
-		&world,
+		world,
 		arkserde.Opts.SkipComponents(ecs.C[Velocity]()),
 		arkserde.Opts.Compress(arkserde.BestCompression),
 	)
@@ -26,9 +26,9 @@ func Example_options() {
 	newWorld := ecs.NewWorld(1024)
 
 	// Register required components and resources
-	_ = ecs.ComponentID[Position](&newWorld)
+	_ = ecs.ComponentID[Position](newWorld)
 
-	err = arkserde.Deserialize(jsonData, &newWorld,
+	err = arkserde.Deserialize(jsonData, newWorld,
 		arkserde.Opts.Compress())
 	if err != nil {
 		fmt.Printf("could not deserialize: %s\n", err)

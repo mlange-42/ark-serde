@@ -21,20 +21,20 @@ func TestDeserializeSkipEntities(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	ecs.AddResource(&w, &Position{})
-	ecs.AddResource(&w, &Velocity{})
+	ecs.AddResource(w, &Position{})
+	ecs.AddResource(w, &Velocity{})
 
-	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipEntities())
+	err = arkserde.Deserialize(jsonData, w, arkserde.Opts.SkipEntities())
 	if err != nil {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := ecs.NewUnsafeFilter(&w).Query()
+	query := ecs.NewUnsafeFilter(w).Query()
 
 	assert.Equal(t, query.Count(), 0)
 	query.Close()
 
-	res := ecs.GetResource[Velocity](&w)
+	res := ecs.GetResource[Velocity](w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 }
 
@@ -48,23 +48,23 @@ func TestDeserializeSkipAllComponents(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&w)
-	_ = ecs.ComponentID[Velocity](&w)
-	_ = ecs.ComponentID[ChildOf](&w)
-	ecs.AddResource(&w, &Position{})
-	ecs.AddResource(&w, &Velocity{})
+	_ = ecs.ComponentID[Position](w)
+	_ = ecs.ComponentID[Velocity](w)
+	_ = ecs.ComponentID[ChildOf](w)
+	ecs.AddResource(w, &Position{})
+	ecs.AddResource(w, &Velocity{})
 
-	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipAllComponents())
+	err = arkserde.Deserialize(jsonData, w, arkserde.Opts.SkipAllComponents())
 	if err != nil {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := ecs.NewUnsafeFilter(&w).Query()
+	query := ecs.NewUnsafeFilter(w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 	query.Close()
 
-	res := ecs.GetResource[Velocity](&w)
+	res := ecs.GetResource[Velocity](w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 
 	assert.True(t, w.Alive(parent))
@@ -81,19 +81,19 @@ func TestDeserializeSkipComponents(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	posId := ecs.ComponentID[Position](&w)
-	velId := ecs.ComponentID[Velocity](&w)
-	childId := ecs.ComponentID[ChildOf](&w)
+	posId := ecs.ComponentID[Position](w)
+	velId := ecs.ComponentID[Velocity](w)
+	childId := ecs.ComponentID[ChildOf](w)
 
-	ecs.AddResource(&w, &Position{})
-	ecs.AddResource(&w, &Velocity{})
+	ecs.AddResource(w, &Position{})
+	ecs.AddResource(w, &Velocity{})
 
-	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipComponents(ecs.C[Position]()))
+	err = arkserde.Deserialize(jsonData, w, arkserde.Opts.SkipComponents(ecs.C[Position]()))
 	if err != nil {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	query := ecs.NewUnsafeFilter(&w).Query()
+	query := ecs.NewUnsafeFilter(w).Query()
 
 	assert.Equal(t, query.Count(), 3)
 
@@ -111,7 +111,7 @@ func TestDeserializeSkipComponents(t *testing.T) {
 	assert.Equal(t, *(*Velocity)(query.Get(velId)), Velocity{X: 5, Y: 6})
 	assert.Equal(t, *(*ChildOf)(query.Get(childId)), ChildOf{Entity: parent})
 
-	res := ecs.GetResource[Velocity](&w)
+	res := ecs.GetResource[Velocity](w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 
 	assert.True(t, w.Alive(parent))
@@ -128,11 +128,11 @@ func TestDeserializeSkipAllResources(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&w)
-	_ = ecs.ComponentID[Velocity](&w)
-	_ = ecs.ComponentID[ChildOf](&w)
+	_ = ecs.ComponentID[Position](w)
+	_ = ecs.ComponentID[Velocity](w)
+	_ = ecs.ComponentID[ChildOf](w)
 
-	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipAllResources())
+	err = arkserde.Deserialize(jsonData, w, arkserde.Opts.SkipAllResources())
 	if err != nil {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
@@ -148,19 +148,19 @@ func TestDeserializeSkipResources(t *testing.T) {
 	fmt.Println(string(jsonData))
 
 	w := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&w)
-	_ = ecs.ComponentID[Velocity](&w)
-	_ = ecs.ComponentID[ChildOf](&w)
+	_ = ecs.ComponentID[Position](w)
+	_ = ecs.ComponentID[Velocity](w)
+	_ = ecs.ComponentID[ChildOf](w)
 
-	ecs.AddResource(&w, &Position{})
-	ecs.AddResource(&w, &Velocity{})
+	ecs.AddResource(w, &Position{})
+	ecs.AddResource(w, &Velocity{})
 
-	err = arkserde.Deserialize(jsonData, &w, arkserde.Opts.SkipResources(ecs.C[Position]()))
+	err = arkserde.Deserialize(jsonData, w, arkserde.Opts.SkipResources(ecs.C[Position]()))
 	if err != nil {
 		assert.Fail(t, "could not deserialize: %s\n", err)
 	}
 
-	res := ecs.GetResource[Velocity](&w)
+	res := ecs.GetResource[Velocity](w)
 	assert.Equal(t, *res, Velocity{X: 1000})
 }
 
@@ -231,29 +231,29 @@ func TestDeserializeErrors(t *testing.T) {
 
 func createWorld(vel bool) *ecs.World {
 	world := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&world)
-	_ = ecs.ComponentID[ChildOf](&world)
-	_ = ecs.ComponentID[ChildRelation](&world)
+	_ = ecs.ComponentID[Position](world)
+	_ = ecs.ComponentID[ChildOf](world)
+	_ = ecs.ComponentID[ChildRelation](world)
 	if vel {
-		_ = ecs.ComponentID[Velocity](&world)
+		_ = ecs.ComponentID[Velocity](world)
 	}
-	return &world
+	return world
 }
 
 func TestDeserializeGZip(t *testing.T) {
 	world := ecs.NewWorld(1024)
 
-	builder := ecs.NewMap2[Position, Velocity](&world)
+	builder := ecs.NewMap2[Position, Velocity](world)
 	cnt := 0
 	builder.NewBatchFn(100, func(entity ecs.Entity, pos *Position, _ *Velocity) {
 		pos.X = float64(cnt)
 		cnt++
 	})
 
-	dataGz, err := arkserde.Serialize(&world, arkserde.Opts.Compress())
+	dataGz, err := arkserde.Serialize(world, arkserde.Opts.Compress())
 	assert.Nil(t, err)
 
-	dataNoGz, err := arkserde.Serialize(&world)
+	dataNoGz, err := arkserde.Serialize(world)
 	assert.Nil(t, err)
 
 	assert.Less(t, len(dataGz), len(dataNoGz))
@@ -261,13 +261,13 @@ func TestDeserializeGZip(t *testing.T) {
 	fmt.Println("Compressed bytes:  ", len(dataGz))
 
 	world1 := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&world1)
-	_ = ecs.ComponentID[Velocity](&world1)
+	_ = ecs.ComponentID[Position](world1)
+	_ = ecs.ComponentID[Velocity](world1)
 
-	err = arkserde.Deserialize(dataGz, &world1, arkserde.Opts.Compress())
+	err = arkserde.Deserialize(dataGz, world1, arkserde.Opts.Compress())
 	assert.Nil(t, err)
 
-	filter := ecs.NewFilter2[Position, Velocity](&world1)
+	filter := ecs.NewFilter2[Position, Velocity](world1)
 	query := filter.Query()
 	assert.Equal(t, 100, query.Count())
 
@@ -286,16 +286,16 @@ type Rand struct {
 
 func TestDeserializeRandSource(t *testing.T) {
 	world := ecs.NewWorld(1024)
-	ecs.AddResource(&world, &Rand{Source: rand.NewPCG(0, uint64(time.Now().UnixNano()))})
+	ecs.AddResource(world, &Rand{Source: rand.NewPCG(0, uint64(time.Now().UnixNano()))})
 
-	js, err := arkserde.Serialize(&world, arkserde.Opts.SkipResources(ecs.C[Rand]()))
+	js, err := arkserde.Serialize(world, arkserde.Opts.SkipResources(ecs.C[Rand]()))
 	assert.Nil(t, err)
 
 	fmt.Println(string(js))
 
 	world2 := ecs.NewWorld(1024)
-	ecs.AddResource(&world2, &Rand{Source: rand.NewPCG(0, uint64(time.Now().UnixNano()))})
-	err = arkserde.Deserialize(js, &world2)
+	ecs.AddResource(world2, &Rand{Source: rand.NewPCG(0, uint64(time.Now().UnixNano()))})
+	err = arkserde.Deserialize(js, world2)
 	if err != nil {
 		panic(err)
 	}
@@ -428,26 +428,26 @@ const textErrResource = `{
 func benchmarkDeserializeJSON(n int, b *testing.B) {
 	w := ecs.NewWorld(1024)
 
-	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper := ecs.NewMap2[Position, Velocity](w)
 	mapper.NewBatchFn(n, nil)
 
-	jsonData, err := arkserde.Serialize(&w)
+	jsonData, err := arkserde.Serialize(w)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	w2 := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&w2)
-	_ = ecs.ComponentID[Velocity](&w2)
+	_ = ecs.ComponentID[Position](w2)
+	_ = ecs.ComponentID[Velocity](w2)
 
-	err = arkserde.Deserialize(jsonData, &w2)
+	err = arkserde.Deserialize(jsonData, w2)
 	if err != nil {
 		panic(err.Error())
 	}
 	w2.Reset()
 
 	for b.Loop() {
-		err = arkserde.Deserialize(jsonData, &w2)
+		err = arkserde.Deserialize(jsonData, w2)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -476,26 +476,26 @@ func BenchmarkDeserializeJSON_100000(b *testing.B) {
 func benchmarkDeserializeGZIP(n int, b *testing.B) {
 	w := ecs.NewWorld(1024)
 
-	mapper := ecs.NewMap2[Position, Velocity](&w)
+	mapper := ecs.NewMap2[Position, Velocity](w)
 	mapper.NewBatchFn(n, nil)
 
-	jsonData, err := arkserde.Serialize(&w, arkserde.Opts.Compress())
+	jsonData, err := arkserde.Serialize(w, arkserde.Opts.Compress())
 	if err != nil {
 		panic(err.Error())
 	}
 
 	w2 := ecs.NewWorld(1024)
-	_ = ecs.ComponentID[Position](&w2)
-	_ = ecs.ComponentID[Velocity](&w2)
+	_ = ecs.ComponentID[Position](w2)
+	_ = ecs.ComponentID[Velocity](w2)
 
-	err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
+	err = arkserde.Deserialize(jsonData, w2, arkserde.Opts.Compress())
 	if err != nil {
 		panic(err.Error())
 	}
 	w2.Reset()
 
 	for b.Loop() {
-		err = arkserde.Deserialize(jsonData, &w2, arkserde.Opts.Compress())
+		err = arkserde.Deserialize(jsonData, w2, arkserde.Opts.Compress())
 		if err != nil {
 			panic(err.Error())
 		}

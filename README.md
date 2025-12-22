@@ -38,7 +38,7 @@ See the [API docs](https://pkg.go.dev/github.com/mlange-42/ark-serde) for more d
 Serialize a world:
 
 ```go
-jsonData, err := arkserde.Serialize(&world)
+jsonData, err := arkserde.Serialize(world)
 if err != nil {
     // handle the error
 }
@@ -47,7 +47,7 @@ if err != nil {
 Deserialize a world:
 
 ```go
-err = arkserde.Deserialize(jsonData, &world)
+err = arkserde.Deserialize(jsonData, world)
 if err != nil {
     // handle the error
 }

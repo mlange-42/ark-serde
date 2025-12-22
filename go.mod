@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/goccy/go-json v0.10.5
-	github.com/mlange-42/ark v0.6.0
+	github.com/mlange-42/ark v0.7.0
 	github.com/stretchr/testify v1.11.1
 )
 

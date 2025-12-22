@@ -1,5 +1,11 @@
 # Changelog
 
+## [[v0.3.1]](https://github.com/mlange-42/ark-serde/compare/v0.3.0...v0.3.1)
+
+### Other
+
+- Upgrade to Ark v0.7.0 (#25)
+
 ## [[v0.3.0]](https://github.com/mlange-42/ark-serde/compare/v0.2.0...v0.3.0)
 
 ### Breaking changes

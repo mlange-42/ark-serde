@@ -25,7 +25,7 @@ func Example() {
 	world := ecs.NewWorld(1024)
 
 	// Populate the world with entities, components and resources.
-	builder := ecs.NewMap1[Coords](&world)
+	builder := ecs.NewMap1[Coords](world)
 	builder.NewBatchFn(60, func(entity ecs.Entity, coord *Coords) {
 		coord.X = rng.Intn(width)
 		coord.Y = rng.Intn(height)
@@ -33,10 +33,10 @@ func Example() {
 
 	// Print the original world
 	fmt.Println("====== Original world ========")
-	printWorld(&world)
+	printWorld(world)
 
 	// Serialize the world.
-	jsonData, err := arkserde.Serialize(&world)
+	jsonData, err := arkserde.Serialize(world)
 	if err != nil {
 		fmt.Printf("could not serialize: %s\n", err)
 		return
@@ -49,10 +49,10 @@ func Example() {
 	newWorld := ecs.NewWorld(1024)
 
 	// Register required components and resources
-	_ = ecs.ComponentID[Coords](&newWorld)
+	_ = ecs.ComponentID[Coords](newWorld)
 
 	// Deserialize into the new world.
-	err = arkserde.Deserialize(jsonData, &newWorld)
+	err = arkserde.Deserialize(jsonData, newWorld)
 	if err != nil {
 		fmt.Printf("could not deserialize: %s\n", err)
 		return
@@ -60,7 +60,7 @@ func Example() {
 
 	// Print the deserialized world
 	fmt.Println("====== Deserialized world ========")
-	printWorld(&newWorld)
+	printWorld(newWorld)
 	// Output: ====== Original world ========
 	// --------------------------------O-O---O-
 	// -----------------------O----------------

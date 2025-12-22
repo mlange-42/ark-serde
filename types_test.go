@@ -13,7 +13,7 @@ type CompB struct{}
 func TestBitMask(t *testing.T) {
 	w := ecs.NewWorld(8)
 
-	idA := ecs.ComponentID[CompA](&w)
+	idA := ecs.ComponentID[CompA](w)
 
 	mask := bitMask{}
 
