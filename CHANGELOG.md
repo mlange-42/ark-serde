@@ -1,5 +1,15 @@
 # Changelog
 
+## [[v0.3.2]](https://github.com/mlange-42/ark-serde/compare/v0.3.1...v0.3.2)
+
+### Performance
+
+- Improves serialization performance by 30% by getting rid of `fmt.Fprintf()` calls (#26 by [dylanwglenn](https://github.com/dylanwglenn))
+
+### Other
+
+- Upgrades to Ark v0.8.0 (#28)
+
 ## [[v0.3.1]](https://github.com/mlange-42/ark-serde/compare/v0.3.0...v0.3.1)
 
 ### Other
