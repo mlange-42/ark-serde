@@ -1,7 +1,6 @@
 package arkserde
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
 	"strings"
@@ -71,7 +70,8 @@ func serializeWorld(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(builder, "\"World\" : %s", string(jsonData))
+	builder.WriteString("\"World\" : ")
+	builder.Write(jsonData)
 	return nil
 }
 
@@ -96,7 +96,9 @@ func serializeTypes(world *ecs.World, builder *strings.Builder, opts *serdeOptio
 	maxComp := len(types) - 1
 	counter := 0
 	for _, tp := range types {
-		fmt.Fprintf(builder, "  \"%s\"", tp.String())
+		builder.WriteString("  \"")
+		builder.WriteString(tp.String())
+		builder.WriteByte('"')
 		if counter < maxComp {
 			builder.WriteString(",")
 		}
@@ -151,7 +153,15 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(builder, "    \"%s%s\" : %s,\n", info.Type.String(), targetTag, eJSON)
+					// the following replaces an expensive fmt.Fprintf call;
+					// it is equivalent to the following:
+					//fmt.Fprintf(builder, "    \"%s%s\" : %s,\n", info.Type.String(), targetTag, eJSON)
+					builder.WriteString("    \"")
+					builder.WriteString(info.Type.String())
+					builder.WriteString(targetTag)
+					builder.WriteString("\" : ")
+					builder.Write(eJSON)
+					builder.WriteString(",\n")
 				}
 
 				comp := query.Get(id)
@@ -160,8 +170,10 @@ func serializeComponents(world *ecs.World, builder *strings.Builder, opts *serde
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(builder, "    \"%s\" : ", info.Type.String())
-				fmt.Fprint(builder, string(jsonData))
+				builder.WriteString("    \"")
+				builder.WriteString(info.Type.String())
+				builder.WriteString("\" : ")
+				builder.Write(jsonData)
 				if i < last {
 					builder.WriteString(",")
 				}
@@ -212,9 +224,10 @@ func serializeResources(world *ecs.World, builder *strings.Builder, opts *serdeO
 			return err
 		}
 
-		fmt.Fprint(builder, "    ")
-		fmt.Fprintf(builder, "\"%s\" : ", tp.String())
-		fmt.Fprint(builder, string(jsonData))
+		builder.WriteString("    \"")
+		builder.WriteString(tp.String())
+		builder.WriteString("\" : ")
+		builder.Write(jsonData)
 
 		if counter < last {
 			builder.WriteString(",")
